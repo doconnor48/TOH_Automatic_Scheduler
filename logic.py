@@ -19,17 +19,22 @@ class worker:
 
 def generate_excel_from_csv(file) -> io.BytesIO:
     persons = []
-
+    off_idx1 = None
+    off_idx2 = None
     reader = csv.reader(io.StringIO(file.read().decode('utf-8')))
     headers = next(reader)
-    name_idx = off_idx = rank_idx = sibling_idx = None
+    name_idx = rank_idx = sibling_idx = None
+    no_sibling = False
 
     for i, header in enumerate(headers):
         header = header.lower()
         if 'name' in header:
             name_idx = i
         elif 'off' in header:
-            off_idx = i
+            if off_idx1 is None:
+                off_idx1 = i
+            else:
+                off_idx2 = i
         elif 'rank' in header:
             rank_idx = i
         elif 'sibling' in header:
@@ -37,10 +42,17 @@ def generate_excel_from_csv(file) -> io.BytesIO:
 
     for row in reader:
         name = str(row[name_idx]).strip()
-        off_day = [item.strip() for item in str(row[off_idx]).split(',')]
+        off_day = [item.strip().lower() for item in str(row[off_idx1]).split(',')]
+        if off_idx2 is not None:
+            tmp = [item.strip().lower() for item in str(row[off_idx2]).split(',')]
+            off_day.extend(tmp)
         rank = str(row[rank_idx]).strip().lower()
-        sibling = row[sibling_idx].strip().lower() == 'yes'
-        persons.append(worker(name, rank, off_day, sibling))
+        if sibling_idx is not None:
+            sibling = row[sibling_idx].strip().lower() == 'yes'
+            persons.append(worker(name, rank, off_day, sibling))
+        else:
+            persons.append(worker(name,rank, off_day, False))
+            no_sibling = True
 
     # Combine and shuffle
     random.shuffle(persons)
@@ -117,11 +129,12 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                     assigned = True
                     break
             if assigned == False:
-                beach = random.choice(preferred_beaches)
-                assignments[beach].append(person)
-                assigned_counts[beach] +=1
-                off_day_dict[beach].update(person.offdays)
-                assigned = True
+                for beach in sorted_beaches:
+                    if assigned_counts[beach] < beach_capacity[beach]:
+                        assignments[beach].append(person)
+                        assigned_counts[beach] +=1
+                        off_day_dict[beach].update(person.offdays)
+                        assigned = True
 
     def assign_rank_group2(rank_group, preferred_beaches):
         for person in rank_group:
@@ -195,6 +208,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     italicized_font = Font(italic=True)
 
     double_letter_names = ["baller", "favata"]
+    family_names = ['murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio' ]
 
 
     half = len(beach_names) // 2  # 9 if you have 18 beaches
@@ -226,7 +240,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             parts = person.name.split(' ')
             abbreviated = [day[:3].lower() + "." for day in person.offdays]
             tmp = ', '.join(abbreviated)
-            if person.sibling:
+            if person.sibling or (no_sibling and parts[-1] in family_names):
                 if str(parts[-1]).lower() in double_letter_names:
                     s = str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                 else:
