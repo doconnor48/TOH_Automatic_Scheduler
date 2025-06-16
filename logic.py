@@ -175,6 +175,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         if assigned_sib:
                             tmp = sibl(last_name,beach)
                             already_assigned_families.append(tmp)
+                        break
 
     def assign_rank_group2(rank_group, preferred_beaches, already_assigned_families, family_names, beach_names):
         for person in rank_group:
