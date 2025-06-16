@@ -15,6 +15,10 @@ class worker:
         self.rank = rank
         self.offdays = offdays
         self.sibling = sibling
+class sibling:
+    def __init__(self,name,beach):
+        self.name = name
+        self.beach = beach
 
 
 def generate_excel_from_csv(file) -> io.BytesIO:
@@ -52,7 +56,6 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             persons.append(worker(name, rank, off_day, sibling))
         else:
             persons.append(worker(name,rank, off_day, False))
-            no_sibling = True
 
     # Combine and shuffle
     random.shuffle(persons)
@@ -99,7 +102,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     sg_beaches = ['Sea Glades','Middle', '2Chair', '7Chair', 'Nassau 1', 'Nassau 5', 'Anchor',
               'Surfing Bay', 'West Lido', 'East Lido']
     rookie_beaches = ['Main', 'Nassau 2', 'Reef', 'Lido West', 'Malibu']
-        
+    family_names = {'murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio' }
 
 
     beach_names = [b[0] for b in beaches]
@@ -111,22 +114,56 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     def count_offday_overlap(beach, person):
         return len(off_day_dict[beach].intersection(person.offdays))
 
-    def assign_rank_group(rank_group, preferred_beaches, beach_quota):
+    def assign_rank_group(rank_group, preferred_beaches, beach_quota, already_assigned_families, family_names, beach_names):
         for person in rank_group:
             assigned = False
-            sorted_beaches = sorted(
+            assigned_sib = False
+            preferred_beaches_1 = None
+            last_name = person.name.split(' ')
+            last_name = last_name[-1].lower()
+            if last_name in family_names:
+                assigned_sib = True
+                for sib in already_assigned_families:
+                    if sib.name == last_name:
+                        beach = sib.beach
+                        assigned_sib = False
+                        break
+                if not assigned_sib:
+                    for i in range(len(beach_names)):
+                        if beach_names[i] == beach:
+                            ind_low = i-2
+                            ind_high = i+2
+                            if ind_high > len(beach_names) -1:
+                                allowed_beaches = beach_names[ind_low:len(beach_names)]
+                            elif ind_low < 0:
+                                allowed_beaches = beach_names[:ind_high+1]
+                            else:
+                                allowed_beaches = beach_names[ind_low:ind_high+1]
+                            preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
+            if preferred_beaches_1 is not None:
+                sorted_beaches = sorted(
+                preferred_beaches_1,
+                key=lambda b: (
+                    count_offday_overlap(b, person),
+                    assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
+                ))
+            else:
+                sorted_beaches = sorted(
                 preferred_beaches,
                 key=lambda b: (
                     count_offday_overlap(b, person),
                     assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
-                )
-            )
+                ))
+
             for beach in sorted_beaches:
                 if assigned_counts[beach] < beach_capacity[beach] and assigned_counts[beach] < beach_quota[beach]:
                     assignments[beach].append(person)
                     assigned_counts[beach]+=1
                     off_day_dict[beach].update(person.offdays)
                     assigned = True
+                    if assigned_sib:
+                        tmp = sibling(last_name,beach)
+                        already_assigned_families.append(tmp)
                     break
             if assigned == False:
                 for beach in sorted_beaches:
@@ -135,45 +172,82 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         assigned_counts[beach] +=1
                         off_day_dict[beach].update(person.offdays)
                         assigned = True
+                        if assigned_sib:
+                            tmp = sibling(last_name,beach)
+                            already_assigned_families.append(tmp)
 
-    def assign_rank_group2(rank_group, preferred_beaches):
+    def assign_rank_group2(rank_group, preferred_beaches, already_assigned_families, family_names, beach_names):
         for person in rank_group:
             assigned = False
-            sorted_beaches = sorted(
+            assigned_sib = False
+            last_name = person.name.split(' ')
+            last_name = last_name[-1].lower()
+            if last_name in family_names:
+                assigned_sib = True
+                for sib in already_assigned_families:
+                    if sib.name == last_name:
+                        beach = sib.beach
+                        assigned_sib = False
+                        break
+                if not assigned_sib:
+                    for i in range(len(beach_names)):
+                        if beach_names[i] == beach:
+                            ind_low = i-2
+                            ind_high = i+2
+                            if ind_high > len(beach_names) -1:
+                                allowed_beaches = beach_names[ind_low:len(beach_names)]
+                            elif ind_low < 0:
+                                allowed_beaches = beach_names[:ind_high+1]
+                            else:
+                                allowed_beaches = beach_names[ind_low:ind_high+1]
+                            preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
+            if preferred_beaches_1 is not None:
+                sorted_beaches = sorted(
+                preferred_beaches_1,
+                key=lambda b: (
+                    count_offday_overlap(b, person),
+                    assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
+                ))
+            else:
+                sorted_beaches = sorted(
                 preferred_beaches,
                 key=lambda b: (
                     count_offday_overlap(b, person),
                     assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
-                )
-            )
+                ))
+
             for beach in sorted_beaches:
                 if assigned_counts[beach] < beach_capacity[beach]:
                     assignments[beach].append(person)
                     assigned_counts[beach]+=1
                     off_day_dict[beach].update(person.offdays)
                     assigned = True
+                    if assigned_sib:
+                        tmp = sibling(last_name, beach)
+                        already_assigned_families.append(tmp)
                     break
     beach_quota_lt = {
         'Lido West': 3,
         'Reef' : 3,
         'Main' : 3,
-        'Malibu' : 2,
-        'Nassau 2': 2,
+        'Malibu' : 3,
+        'Nassau 2': 3,
         'EAB' : 2,
-        'Main Lido' : 1,
-        'Civic': 1
+        'Main Lido' : 2,
+        'Civic': 2
     }
     beach_quota_sg = {
-        'Nassau 5': 1,
-        'Middle' : 1,
-        '2Chair' : 1,
+        'Nassau 5': 2,
+        'Middle' : 2,
+        '2Chair' : 2,
         '7Chair': 1,
         'Nassau 1': 1,
         'Anchor' : 1,
         'Surfing Bay':1,
         'West Lido' : 1,
         'East Lido' : 1,
-        'Sea Glades': 1
+        'Sea Glades': 1,
+        'EAB': 1
     }
     num_of_rookies_per = round(len(rookies) / len(rookie_beaches))
     if num_of_rookies_per * len(rookie_beaches) < len(rookies):
@@ -188,14 +262,15 @@ def generate_excel_from_csv(file) -> io.BytesIO:
         'Reef': num_of_rookies_per,
         'Lido West': lido_west_rookies
     }
+    already_assigned_families = []
     random.shuffle(slt_beaches)
     #if sg beaches are to deterministic (not enough sgs)
     #random.shuffle(sg_beaches)
-    assign_rank_group(slts, slt_beaches, beach_quota_lt)
-    assign_rank_group(lts, lt_beaches, beach_quota_lt)
-    assign_rank_group(sgs, sg_beaches, beach_quota_sg)
-    assign_rank_group2(guards, beach_names)
-    assign_rank_group(rookies, rookie_beaches, beach_quota_rookie)
+    assign_rank_group(slts, slt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
+    assign_rank_group(lts, lt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
+    assign_rank_group(sgs, sg_beaches, beach_quota_sg, already_assigned_families, family_names, beach_names)
+    assign_rank_group2(guards, beach_names, already_assigned_families, family_names, beach_names)
+    assign_rank_group(rookies, rookie_beaches, beach_quota_rookie, already_assigned_families, family_names, beach_names)
 
     wb = Workbook()
     ws = wb.active
@@ -208,7 +283,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     italicized_font = Font(italic=True)
 
     double_letter_names = ["baller", "favata"]
-    family_names = ['murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio' ]
+
 
 
     half = len(beach_names) // 2  # 9 if you have 18 beaches
@@ -240,7 +315,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             parts = person.name.split(' ')
             abbreviated = [day[:3].lower() + "." for day in person.offdays]
             tmp = ', '.join(abbreviated)
-            if person.sibling or (no_sibling and parts[-1] in family_names):
+            if person.sibling or (parts[-1] in family_names):
                 if str(parts[-1]).lower() in double_letter_names:
                     s = str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                 else:
