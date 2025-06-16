@@ -15,7 +15,7 @@ class worker:
         self.rank = rank
         self.offdays = offdays
         self.sibling = sibling
-class sibling:
+class sibl:
     def __init__(self,name,beach):
         self.name = name
         self.beach = beach
@@ -162,7 +162,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                     off_day_dict[beach].update(person.offdays)
                     assigned = True
                     if assigned_sib:
-                        tmp = sibling(last_name,beach)
+                        tmp = sibl(last_name,beach)
                         already_assigned_families.append(tmp)
                     break
             if assigned == False:
@@ -173,7 +173,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         off_day_dict[beach].update(person.offdays)
                         assigned = True
                         if assigned_sib:
-                            tmp = sibling(last_name,beach)
+                            tmp = sibl(last_name,beach)
                             already_assigned_families.append(tmp)
 
     def assign_rank_group2(rank_group, preferred_beaches, already_assigned_families, family_names, beach_names):
@@ -181,6 +181,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             assigned = False
             assigned_sib = False
             last_name = person.name.split(' ')
+            preferred_beaches_1 = None
             last_name = last_name[-1].lower()
             if last_name in family_names:
                 assigned_sib = True
@@ -223,7 +224,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                     off_day_dict[beach].update(person.offdays)
                     assigned = True
                     if assigned_sib:
-                        tmp = sibling(last_name, beach)
+                        tmp = sibl(last_name, beach)
                         already_assigned_families.append(tmp)
                     break
     beach_quota_lt = {
