@@ -121,6 +121,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             preferred_beaches_1 = None
             last_name = person.name.split(' ')
             last_name = last_name[-1].lower()
+            allowed_beaches = None
             if last_name in family_names:
                 assigned_sib = True
                 for sib in already_assigned_families:
@@ -129,16 +130,23 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         assigned_sib = False
                         break
                 if not assigned_sib:
-                    for i in range(len(beach_names)):
-                        if beach_names[i] == beach:
-                            ind_low = i-2
-                            ind_high = i+2
-                            if ind_high > len(beach_names) -1:
-                                allowed_beaches = beach_names[ind_low:len(beach_names)]
-                            elif ind_low < 0:
-                                allowed_beaches = beach_names[:ind_high+1]
-                            else:
-                                allowed_beaches = beach_names[ind_low:ind_high+1]
+                    if beach == 'EAB' or beach == 'Sea Glades':
+                        preferred_beaches_1 = list(set(preferred_beaches) & set(['EAB', 'Sea Glades']))
+                    else:
+                        for i in range(len(beach_names)):  
+                            if beach_names[i] == beach:
+                                ind_low = i-2
+                                ind_high = i+2
+                                if ind_high > len(beach_names) -1:
+                                    allowed_beaches = beach_names[ind_low:len(beach_names)]
+                                    break
+                                elif ind_low < 0:
+                                    allowed_beaches = beach_names[:ind_high+1]
+                                    break
+                                else:
+                                    allowed_beaches = beach_names[ind_low:ind_high+1]
+                                    break
+                        if allowed_beaches:
                             preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
             if preferred_beaches_1 is not None:
                 sorted_beaches = sorted(
@@ -184,6 +192,7 @@ def generate_excel_from_csv(file) -> io.BytesIO:
             last_name = person.name.split(' ')
             preferred_beaches_1 = None
             last_name = last_name[-1].lower()
+            allowed_beaches = None
             if last_name in family_names:
                 assigned_sib = True
                 for sib in already_assigned_families:
@@ -192,16 +201,23 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         assigned_sib = False
                         break
                 if not assigned_sib:
-                    for i in range(len(beach_names)):
-                        if beach_names[i] == beach:
-                            ind_low = i-2
-                            ind_high = i+2
-                            if ind_high > len(beach_names) -1:
-                                allowed_beaches = beach_names[ind_low:len(beach_names)]
-                            elif ind_low < 0:
-                                allowed_beaches = beach_names[:ind_high+1]
-                            else:
-                                allowed_beaches = beach_names[ind_low:ind_high+1]
+                    if beach == 'EAB' or beach == 'Sea Glades':
+                        preferred_beaches_1 = list(set(preferred_beaches) & set(['EAB', 'Sea Glades']))
+                    else:
+                        for i in range(len(beach_names)):  
+                            if beach_names[i] == beach:
+                                ind_low = i-2
+                                ind_high = i+2
+                                if ind_high > len(beach_names) -1:
+                                    allowed_beaches = beach_names[ind_low:len(beach_names)]
+                                    break
+                                elif ind_low < 0:
+                                    allowed_beaches = beach_names[:ind_high+1]
+                                    break
+                                else:
+                                    allowed_beaches = beach_names[ind_low:ind_high+1]
+                                    break
+                        if allowed_beaches:
                             preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
             if preferred_beaches_1 is not None:
                 sorted_beaches = sorted(
