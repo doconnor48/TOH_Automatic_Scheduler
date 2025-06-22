@@ -334,7 +334,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
         'Nassau 5': 2,
         'Middle' : 2,
         '2Chair' : 2,
-        '7Chair': 1,
+        '7 Chair': 1,
         'Nassau 1': 1,
         'Anchor' : 1,
         'Surfing Bay':1,
