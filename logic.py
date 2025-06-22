@@ -86,7 +86,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
 
     # get the number of people needed at each beach
     #These are weights of each beach. Example: Civic, 0.05 means civic gets 5 percent of the entire crew. These are able to be changed, but the total should add up to 1. I just went with my best guess as to how they were distributed
-    beaches = [('Civic',0.05), ('Middle',0.035), ('2Chair',0.04), ('Main',0.1), ('7Chair',0.035), ('Malibu',0.07), ('Nassau 1',0.03), ('Nassau 2',0.08), ('Nassau 5', 0.05), ('Reef', 0.1), ('Anchor', 0.04),('East Lido', 0.035), ('Main Lido', 0.06), ('West Lido', 0.035), ('Lido West', 0.1), ('Surfing Bay', 0.035), ('EAB', 0.07), ('Sea Glades', 0.035)]
+    beaches = [('Civic',0.05), ('Middle',0.035), ('2Chair',0.04), ('Main',0.1), ('7 Chair',0.035), ('Malibu',0.07), ('Nassau 1',0.03), ('Nassau 2',0.08), ('Nassau 5', 0.05), ('Reef', 0.1), ('Anchor', 0.04),('East Lido', 0.035), ('Main Lido', 0.06), ('West Lido', 0.035), ('Lido West', 0.1), ('Surfing Bay', 0.035), ('EAB', 0.07), ('Sea Glades', 0.035)]
 
     num_people = []
     count = 0
@@ -101,10 +101,10 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
 
     slt_beaches = ['Lido West', 'Reef', 'Main', 'Nassau 2']
     lt_beaches = ['Lido West','Reef', 'Main', 'Malibu', 'Nassau 2', 'EAB', 'Main Lido', 'Civic']
-    sg_beaches = ['Sea Glades','Middle', '2Chair', '7Chair', 'Nassau 1', 'Nassau 5', 'Anchor',
+    sg_beaches = ['Sea Glades','Middle', '2Chair', '7 Chair', 'Nassau 1', 'Nassau 5', 'Anchor',
               'Surfing Bay', 'West Lido', 'East Lido']
     rookie_beaches = ['Main', 'Nassau 2', 'Reef', 'Lido West', 'Malibu']
-    family_names = {'murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio' }
+    family_names = {'murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio', 'creagh'}
 
 
     def extract_previous_data(previous_schedule_file):
@@ -171,13 +171,13 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             if preferred_beaches_1 is not None:
                 if previous_beach_dic:
                     parts = person.name.split(' ')
-                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    not_good_beach = previous_beach_dic.get(str(parts[-1]).upper())
                     key =str(parts[-1]).upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                     if key:
                         previous_beach_dic.pop(key)
@@ -192,13 +192,13 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             else:
                 if previous_beach_dic:
                     parts = person.name.split(' ')
-                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    not_good_beach = previous_beach_dic.get(str(parts[-1]).upper())
                     key =str(parts[-1]).upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                     if key:
                         previous_beach_dic.pop(key)
@@ -270,13 +270,13 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             if preferred_beaches_1 is not None:
                 if previous_beach_dic:
                     parts = person.name.split(' ')
-                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    not_good_beach = previous_beach_dic.get(str(parts[-1]).upper())
                     key =str(parts[-1]).upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                     if key:
                         previous_beach_dic.pop(key)
@@ -291,13 +291,13 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             else:
                 if previous_beach_dic:
                     parts = person.name.split(' ')
-                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    not_good_beach = previous_beach_dic.get(str(parts[-1]).upper())
                     key =str(parts[-1]).upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
                     if not_good_beach:
-                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
                     if key:
                         previous_beach_dic.pop(key)
