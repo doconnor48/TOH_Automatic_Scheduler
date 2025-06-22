@@ -6,6 +6,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font,PatternFill
 from openpyxl.utils import get_column_letter
 import io
+from openpyxl import load_workbook
+
 
 
 
@@ -21,7 +23,7 @@ class sibl:
         self.beach = beach
 
 
-def generate_excel_from_csv(file) -> io.BytesIO:
+def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
     persons = []
     off_idx1 = None
     off_idx2 = None
@@ -105,16 +107,32 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     family_names = {'murphy', 'walter', 'walsh', 'dorn', 'cody', 'rinn', 'pongratz', 'newby', 'russo', 'gutman', 'trzcinski', 'baller', 'favata', 'fitzpatrick', 'canty', 'boccio' }
 
 
+    def extract_previous_data(previous_schedule_file):
+        wb = load_workbook(previous_schedule_file)
+        ws = wb.active
+        person_to_beach = {}
+        for col in ws.iter_cols(min_col = 1):
+            curr_beach = None
+            for row_idx, cell in enumerate(col):
+                if cell.font and cell.font.bold:
+                    curr_beach = str(cell.value).strip()
+                elif curr_beach:
+                    person_to_beach[str(cell.value.strip())] = curr_beach
+        return person_to_beach
+    
+                
+
     beach_names = [b[0] for b in beaches]
     beach_capacity = {beach: int(n) for beach, n in zip(beach_names, num_people)}
     assigned_counts = defaultdict(int)
     off_day_dict = defaultdict(set)
     assignments = defaultdict(list)
+
     #for slts/lts and sgs
     def count_offday_overlap(beach, person):
         return len(off_day_dict[beach].intersection(person.offdays))
 
-    def assign_rank_group(rank_group, preferred_beaches, beach_quota, already_assigned_families, family_names, beach_names):
+    def assign_rank_group(rank_group, preferred_beaches, beach_quota, already_assigned_families, family_names, beach_names, previous_beach_dic = None):
         for person in rank_group:
             assigned = False
             assigned_sib = False
@@ -149,6 +167,20 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         if allowed_beaches:
                             preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
             if preferred_beaches_1 is not None:
+                if previous_beach_dic:
+                    parts = person.name.split(' ')
+                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    key =str(parts[-1]).upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
+                    if key:
+                        previous_beach_dic.pop(key)
+                    if not_good_beach in preferred_beaches_1:
+                        preferred_beaches_1.remove(not_good_beach)
                 sorted_beaches = sorted(
                 preferred_beaches_1,
                 key=lambda b: (
@@ -156,6 +188,20 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                     assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
                 ))
             else:
+                if previous_beach_dic:
+                    parts = person.name.split(' ')
+                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    key =str(parts[-1]).upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
+                    if key:
+                        previous_beach_dic.pop(key)
+                    if not_good_beach in preferred_beaches:
+                        preferred_beaches.remove(not_good_beach)
                 sorted_beaches = sorted(
                 preferred_beaches,
                 key=lambda b: (
@@ -220,6 +266,20 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                         if allowed_beaches:
                             preferred_beaches_1 = list(set(allowed_beaches) & set(preferred_beaches))
             if preferred_beaches_1 is not None:
+                if previous_beach_dic:
+                    parts = person.name.split(' ')
+                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    key =str(parts[-1]).upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
+                    if key:
+                        previous_beach_dic.pop(key)
+                    if not_good_beach in preferred_beaches_1:
+                        preferred_beaches_1.remove(not_good_beach)
                 sorted_beaches = sorted(
                 preferred_beaches_1,
                 key=lambda b: (
@@ -227,6 +287,20 @@ def generate_excel_from_csv(file) -> io.BytesIO:
                     assigned_counts[b] / beach_capacity[b] if beach_capacity[b] > 0 else 1
                 ))
             else:
+                if previous_beach_dic:
+                    parts = person.name.split(' ')
+                    not_good_beach = previous_beach_dic(str(parts[-1]).upper())
+                    key =str(parts[-1]).upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
+                    if not_good_beach:
+                        not_good_beach = previous_beach_dic(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
+                        key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
+                    if key:
+                        previous_beach_dic.pop(key)
+                    if not_good_beach in preferred_beaches:
+                        preferred_beaches.remove(not_good_beach)
                 sorted_beaches = sorted(
                 preferred_beaches,
                 key=lambda b: (
@@ -284,6 +358,12 @@ def generate_excel_from_csv(file) -> io.BytesIO:
     random.shuffle(slt_beaches)
     #if sg beaches are to deterministic (not enough sgs)
     #random.shuffle(sg_beaches)
+
+    #generate dictionary from previous excel file, if necessary
+    previous_beach_dic = None
+    if previous_schedule_file:
+        previous_beach_dic = extract_previous_data(previous_schedule_file)
+    
     assign_rank_group(slts, slt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
     assign_rank_group(lts, lt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
     assign_rank_group(sgs, sg_beaches, beach_quota_sg, already_assigned_families, family_names, beach_names)
