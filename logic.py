@@ -116,8 +116,10 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             for row_idx, cell in enumerate(col):
                 if cell.font and cell.font.bold:
                     curr_beach = str(cell.value).strip()
-                elif curr_beach:
-                    person_to_beach[str(cell.value.strip())] = curr_beach
+                elif curr_beach and cell.value:
+                    name = str(cell.value).strip()
+                    if name:
+                        person_to_beach[name] = curr_beach
         return person_to_beach
     
                 
