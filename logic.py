@@ -179,7 +179,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
                     if not_good_beach:
                         not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
-                    if key:
+                    if key and key in previous_beach_dic:
                         previous_beach_dic.pop(key)
                     if not_good_beach in preferred_beaches_1:
                         preferred_beaches_1.remove(not_good_beach)
@@ -200,7 +200,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
                     if not_good_beach:
                         not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
-                    if key:
+                    if key and key in previous_beach_dic:
                         previous_beach_dic.pop(key)
                     if not_good_beach in preferred_beaches:
                         preferred_beaches.remove(not_good_beach)
@@ -233,7 +233,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
                             already_assigned_families.append(tmp)
                         break
 
-    def assign_rank_group2(rank_group, preferred_beaches, already_assigned_families, family_names, beach_names):
+    def assign_rank_group2(rank_group, preferred_beaches, already_assigned_families, family_names, beach_names, previous_beach_dic):
         for person in rank_group:
             assigned = False
             assigned_sib = False
@@ -278,7 +278,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
                     if not_good_beach:
                         not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
-                    if key:
+                    if key and key in previous_beach_dic:
                         previous_beach_dic.pop(key)
                     if not_good_beach in preferred_beaches_1:
                         preferred_beaches_1.remove(not_good_beach)
@@ -299,7 +299,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
                     if not_good_beach:
                         not_good_beach = previous_beach_dic.get(str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper())
                         key =str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
-                    if key:
+                    if key and key in previous_beach_dic:
                         previous_beach_dic.pop(key)
                     if not_good_beach in preferred_beaches:
                         preferred_beaches.remove(not_good_beach)
@@ -366,11 +366,11 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
     if previous_schedule_file:
         previous_beach_dic = extract_previous_data(previous_schedule_file)
     
-    assign_rank_group(slts, slt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
-    assign_rank_group(lts, lt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names)
-    assign_rank_group(sgs, sg_beaches, beach_quota_sg, already_assigned_families, family_names, beach_names)
-    assign_rank_group2(guards, beach_names, already_assigned_families, family_names, beach_names)
-    assign_rank_group(rookies, rookie_beaches, beach_quota_rookie, already_assigned_families, family_names, beach_names)
+    assign_rank_group(slts, slt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names, previous_beach_dic)
+    assign_rank_group(lts, lt_beaches, beach_quota_lt, already_assigned_families, family_names, beach_names, previous_beach_dic)
+    assign_rank_group(sgs, sg_beaches, beach_quota_sg, already_assigned_families, family_names, beach_names, previous_beach_dic)
+    assign_rank_group2(guards, beach_names, already_assigned_families, family_names, beach_names, previous_beach_dic)
+    assign_rank_group(rookies, rookie_beaches, beach_quota_rookie, already_assigned_families, family_names, beach_names, previous_beach_dic)
 
     wb = Workbook()
     ws = wb.active
