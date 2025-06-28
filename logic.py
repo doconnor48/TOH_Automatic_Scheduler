@@ -68,6 +68,7 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
     sgs = []
     rookies = []
     guards = []
+    part_timers = []
     senior_lt_pseuds = ["slt", "senior lieutenant", "senior leuitenant", 'senior liuetenant', 'senor lieutenant', 'senor leuitenant', 'senor liuetenant', 'sen lt', 'senior lt', 'senior lieut','senior liet', 'senor lt', 'senor lieut', 'sen lt', 'slt.', 'sen lt.', 'senior lt.', 'sen lt.', 'senior liet.', 'senor lt.', 'sen lt.', 'srlt', 'srlt.']
     lt_pseuds = ['lt', 'lieutenant', 'leuitenant', 'liuetenant', 'liet', 'lieut', 'lut', 'lt.', 'liet.']
     sg_pseuds = ['senior guard', 'sg', 'senor gard', 'senor guard', 'sg.', 'sr guard', 'sr. guard', 'sr gard', 'sr. gard','srg', 'sg.', 'srg.']
@@ -81,6 +82,8 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
             sgs.append(person)
         elif person.rank in rookie_pseuds:
             rookies.append(person)
+        elif 'part' in person.rank:
+            part_timers.append(person)
         else:
             guards.append(person)
 
@@ -457,6 +460,27 @@ def generate_excel_from_csv(file, previous_schedule_file = None) -> io.BytesIO:
     sg_cell = ws.cell(row=row_offset+2, column=key_col)
     sg_cell.value = "Senior Guard"
     sg_cell.fill = blue_fill
+
+    part_time_col = key_col + 2
+    part_col_letter = get_column_letter(part_time_col)
+    ws.column_dimensions[part_col_letter].width = 25
+
+    part_title_cell = ws.cell(row = row_offset, column = part_time_col)
+    part_title_cell.value = 'Part-Timers'
+    part_title_cell.font = bold_font
+    for i,p in enumerate(part_timers):
+        new_cell = ws.cell(row = row_offset+i, column = part_time_col)
+        parts = p.name.split(' ')
+        abbreviated = [day[:3].lower() + "." for day in person.offdays]
+        tmp = ', '.join(abbreviated)
+        if p.sibling or (parts[-1] in family_names):
+            if str(parts[-1]).lower() in double_letter_names:
+                s = str(f"{parts[0][0]}{parts[0][1]}. {parts[-1]} ({tmp})").upper()
+            else:
+                s = str(f"{parts[0][0]}. {parts[-1]} ({tmp})").upper()
+            new_cell.value = s
+        else:
+            new_cell.value = str(f"{parts[-1]} ({tmp})").upper()
 
     # Save the workbook
     output = io.BytesIO()
